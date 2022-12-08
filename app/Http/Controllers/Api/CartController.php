@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Repositories\CartRepository;
+use http\Client\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -11,23 +14,32 @@ class CartController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function index()
     {
-        //
+        $cartContent = (new CartRepository())->content();
+         $cartCount = (new CartRepository())->count();
+        return response()->json([
+            'cartContent'=>$cartContent,
+            'cartCount'=>$cartCount
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
         $product = Product::where('id', $request->productId)->first();
-        return $product;
+
+        $count = (new CartRepository())->add($product);
+        return Response()->json([
+            'count'=>$count
+        ]);
     }
 
     /**
@@ -61,6 +73,23 @@ class CartController extends Controller
      */
     public function destroy($id)
     {
-        //
+        (new CartRepository())->remove($id);
+    }
+
+    public function increase($id){
+        (new CartRepository())->increase($id);
+    }
+
+    public function decrease($id){
+        (new CartRepository())->decrease($id);
+    }
+
+    public function count()
+    {
+        $count = (new CartRepository())->count();
+
+        return response()->json([
+           'count' =>$count
+        ]);
     }
 }
